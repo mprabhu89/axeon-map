@@ -35,8 +35,8 @@
 
 ## V1.1 delivery sequence
 
-- Task 022: select and scaffold the self-hosted server foundation, authenticated-principal contract, server-only configuration boundary, and validated object-registry model without connecting to Maximo or a database.
-- Follow with mandatory authentication/session implementation before exposing any network data API.
+- Task 022: completed local self-hosted server foundation, authenticated-principal contract, server-only configuration boundary, and validated object-registry model without connecting to Maximo or a database.
+- Task 023: implement mandatory authentication and protected sessions before exposing any network data API.
 - Validate one approved, authorization-preserving Maximo API adapter before adding restricted Db2 or SQL Server read-only adapters.
 - Add database connectivity only with least-privilege accounts, parameterized reviewed operations, authorization propagation, bounds, auditing, and customer approval.
 - Add administration UI, SSO integration, customer object profiles, and customer Work Type mappings only after their server-side authorization/governance boundaries are established.

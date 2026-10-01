@@ -14,6 +14,6 @@ Maintain these diagrams as the design and implementation evolve:
 | [Development Architecture](development-architecture.md) | Synthetic-data local development, provider resolver, and authorized MAS validation |
 | Relevant sequence diagrams | Key investigation and Node Intelligence interactions as implemented |
 | [Real Maximo Adapter Readiness](real-maximo-adapter-readiness.md) | Contract readiness, responsibilities, gaps, and MAS-only validation |
-| [V1.1 Architecture Baseline](v1.1-architecture-baseline.md) | Planned self-hosted server, authentication, object-registry, adapter, database, and AI boundaries |
+| [V1.1 Architecture Baseline](v1.1-architecture-baseline.md) | AX-022 Node server foundation and planned authentication, object-registry, adapter, database, and AI boundaries |
 
 The current local [Development Architecture diagram](development-architecture.md) records aggregate and filter discovery, record preview, investigation persistence, deterministic analytics, provider resolution, and Mock AI paths. The deployment diagram records the intended server-side credential boundary; it is not proof of MAS compatibility. The established target relationship is recorded in the [TDD](../tdd/README.md).

@@ -58,6 +58,8 @@ Task 020 adds V1 local security/data-protection hardening: the authorization-fir
 
 Task 021 advances the development baseline to **1.1.0-dev** without changing the V1 investigation experience. It documents the planned self-hosted server boundary for mandatory authentication, configuration, approved object profiles, server-side adapters, restricted read-only database connectivity, and provider integration. The current Mock Adapter and synthetic dataset remain active locally. See the [V1.1 architecture baseline](docs/architecture/v1.1-architecture-baseline.md).
 
+Task 022 adds the local Node.js/TypeScript server foundation in `app/server`. Run `npm run build`, then `npm run server:start` from `app` to serve the built UI and `GET /api/v1/health` on `127.0.0.1:3000`. It provides no data APIs, authentication, database/Maximo connection, or provider calls.
+
 ## Release versioning
 
 Axeon releases use `MAJOR.MINOR.PATCH[-PRERELEASE]`. Development uses `-dev`, release candidates use forms such as `-rc.1`, and a formal release omits the suffix. Promote a future release by changing the version in `app/package.json` through the normal package-version workflow so its lockfile mirror stays aligned; product code must not duplicate the literal.

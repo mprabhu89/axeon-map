@@ -208,3 +208,16 @@ Invalid context never falls back to root. Filter discovery, aggregates, preview 
 ## Task 020 protection lifecycle
 
 The same authorization-first flow applies to every data use: authorized adapter DTOs feed bounded aggregates, preview/export, deterministic analytics, reports, and optionally a minimal Context Pack. Client persistence is metadata-only; report snapshots are bounded presentation handoffs. No raw Work Order collection is written to browser storage, placed in a URL, logged, or sent to the local Mock AI provider.
+
+## AX-022 server ingress
+
+```mermaid
+flowchart LR
+    Browser -->|GET /api/v1/health| Server[Node server foundation]
+    Browser -->|future protected operation| Principal[Require authenticated principal]
+    Principal --> Registry[Approved object profile]
+    Registry --> Authorization[Future Maximo authorization]
+    Authorization --> Adapter[Future server adapter]
+```
+
+Only the health branch exists in AX-022. The protected branch is a fail-closed contract and does not invoke adapters, databases, Maximo, or AI.

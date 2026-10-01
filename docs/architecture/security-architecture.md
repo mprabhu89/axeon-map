@@ -46,3 +46,7 @@ The governing invariant is: **Axeon must never retrieve, analyze, display, expor
 ## V1.1 server authorization boundary
 
 The planned self-hosted server must authenticate the caller before any data-bearing route, resolve only an approved object profile, and apply Maximo authorization before returning normalized bounded Axeon DTOs. A read-only Db2 or SQL Server connection is a separate technical restriction; it cannot be treated as proof of the current user's Maximo authorization. Database credentials and AI-provider secrets remain server-side. See the [V1.1 baseline](v1.1-architecture-baseline.md).
+
+## AX-022 server controls
+
+The foundation exposes only a public health route and static browser assets. It has no data route and no authentication bypass. Future protected operations use `requireAuthenticatedPrincipal` before object profile or adapter work. The configuration loader accepts safe references rather than credential values, the registry rejects query-bearing configuration, static path traversal is rejected, request bodies are bounded, and API errors disclose no internal configuration.

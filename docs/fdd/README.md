@@ -154,3 +154,9 @@ The Open Records modal uses a dependency-free top-right close icon with the acce
 The V1.1 development baseline preserves all current investigation behavior while planning a self-hosted Axeon server for configuration, authentication, object governance, data access, and AI-provider integration. Work Orders, Service Requests, Incidents, and approved custom objects will be governed by an administrator-managed registry of approved profiles rather than arbitrary database objects. The registry determines what Axeon exposes; Maximo security determines what a user may access.
 
 Mandatory authentication is required before network data APIs are deployed. Read-only Db2 or SQL Server access will be a restricted server-side connection only and does not replace Maximo authorization. The current Mock Adapter and synthetic data remain the local development path. Task 021 adds no server, database connection, authentication, administration UI, or visible workflow change.
+
+## Secure application server foundation (Task 022)
+
+The V1 UI remains unchanged. Axeon now has a separate Node.js/TypeScript server foundation that serves the built browser application and exposes a versioned health endpoint. It intentionally exposes no Work Order, object, analytics, export, report, AI, Maximo, or database API. Future data APIs are contractually protected by authenticated-principal and authorization interfaces and must fail closed until authentication is implemented.
+
+The server owns validated non-secret configuration and a server-owned approved object-profile registry. Profiles support Work Orders, Service Requests, Incidents, Assets, and approved custom objects through allowed metadata only; they do not expose arbitrary SQL or grant Maximo permissions.

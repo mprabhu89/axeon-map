@@ -154,3 +154,4 @@ Browser detail: named SITE-A → WAPPR reopened as a committed two-level spine. 
 - [Task 019 investigation continuity and release resilience](task-019.md)
 - [Task 020 V1 security, data protection, logging and release-candidate hardening](task-020.md)
 - [Task 021 V1.1 architecture baseline](task-021.md)
+- [AX-022 secure application server foundation](task-022.md)

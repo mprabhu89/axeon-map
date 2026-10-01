@@ -26,6 +26,10 @@ Task 020 adds no production runtime or external connection. The intended target 
 
 V1.1 plans a self-hosted Axeon server behind the browser UI. The server is the only location for database credentials, Maximo integration configuration, authentication/session handling, administrator object-registry configuration, and AI-provider secrets. Task 021 adds this design only; it does not select a hosting platform, server runtime, authentication protocol, database driver, endpoint, or secret store.
 
+## AX-022 server foundation
+
+`app/server` is a self-hosted Node.js/TypeScript foundation. It serves the local built application and a public health check only. It is intentionally not deployed or exposed beyond local development. Configuration has no credential fields, data endpoints remain absent, and protected contracts fail closed before any future adapter operation. Production topology, reverse proxy/TLS, secret manager, service account, session store, CSP, and monitoring remain unresolved deployment decisions.
+
 ## Task 017 deployment boundary
 
 Task 017 adds no deployment runtime. Adapter selection is explicit: Mock is active locally and Real Maximo is not configured. The future Real Adapter must discover supported APIs/Object Structures and session/security behavior in an authorized MAS environment, normalize responses, declare verified capabilities, and fail closed when unavailable. AX-DEP-001 remains a target rather than a validated deployment claim.
