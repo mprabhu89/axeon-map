@@ -42,7 +42,11 @@ Task 017 adds explicit adapter configuration/resolution, capability and availabi
 
 ## Task 018 release identity
 
-Task 018 identifies the local build as `1.0.0-dev` through package metadata and a typed release view. No build timestamp is generated, so builds and tests remain stable. Safe diagnostic metadata combines release, selected adapter profile, AI provider identity/status, and the development security marker without storage, logging, or transmission.
+Task 021 identifies the local V1.1 build as `1.1.0-dev` through package metadata and a typed release view. No build timestamp is generated, so builds and tests remain stable. Safe diagnostic metadata combines release, selected adapter profile, AI provider identity/status, and the development security marker without storage, logging, or transmission.
+
+## V1.1 server development path
+
+The current browser-only Mock path remains the local development baseline. A future server test path will use the same normalized adapter DTO contracts, but will add an authenticated principal, server-only configuration, approved object-registry profile, and fail-closed adapter resolver before calling a data source. No server runtime or service is created in Task 021.
 
 ## Task 019 report runtime
 

@@ -15,3 +15,5 @@
 | Popup/report snapshot abuse | synchronous open, opaque ID, expiry, schema and size validation | Browser popup/session behavior acceptance |
 
 Out of scope for V1 local development: Maximo authentication, MAS network policy, CSP/security headers, production audit retention, SSO/session configuration, real AI provider implementation, and formal penetration testing.
+
+For V1.1, mandatory server authentication, authorization propagation through API/database paths, object-registry governance, server secret management, database driver hardening, and SSO trust boundaries require design review and implementation before network deployment.

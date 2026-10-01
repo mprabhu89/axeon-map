@@ -77,7 +77,7 @@ Acceptance evidence will be linked from [test evidence](../test-evidence/README.
 
 | ID | Requirement | Design source | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| AX-NFR-REL-001 | Axeon Map shall expose a centrally managed product release version using MAJOR.MINOR.PATCH with optional prerelease identification, and application/report version displays shall derive from that authoritative source. | FDD, TDD, User Guide, Component Architecture | Implemented for 1.0.0-dev using package metadata and a typed release contract | Task 018 release, application, report, and source-divergence tests |
+| AX-NFR-REL-001 | Axeon Map shall expose a centrally managed product release version using MAJOR.MINOR.PATCH with optional prerelease identification, and application/report version displays shall derive from that authoritative source. | FDD, TDD, User Guide, Component Architecture | Implemented for 1.1.0-dev using package metadata and a typed release contract | Task 018 and Task 021 release/source-divergence tests |
 
 ## Task 020 security and release-candidate hardening requirements
 
@@ -87,3 +87,12 @@ Acceptance evidence will be linked from [test evidence](../test-evidence/README.
 | AX-NFR-SEC-007 | Axeon Map diagnostic logging shall use a typed allowlist and shall exclude operational records, AI content, credentials, endpoints, SQL, raw exceptions, and other sensitive payloads. | TDD, Logging Standard | Implemented locally | Task 020 logger allowlist/correlation tests |
 | AX-NFR-SEC-008 | Axeon Map shall treat Maximo and user text as untrusted data, safely render it, neutralize CSV formula-like cells, and reject malformed client persistence/report transfer state without broadening context. | FDD, TDD, Security Architecture | Implemented locally | Task 020 XSS, CSV, persistence, and report validation tests |
 | AX-NFR-SEC-009 | Axeon Map shall preserve an authorization-first, fail-closed adapter boundary for every data-bearing capability; local Mock markers shall not be presented as Maximo enforcement. | FDD, TDD, Security Architecture | Contract implemented; authorized MAS proof pending | Task 017 contract evidence and Task 020 audit |
+
+## Task 021 V1.1 architecture-baseline requirements
+
+| ID | Requirement | Design source | Status | Evidence |
+| --- | --- | --- | --- | --- |
+| AX-AR-005 | Axeon Map shall preserve provider- and data-source-independent browser contracts while placing production configuration, credentials, authentication, adapter execution, and provider communication behind a server-side boundary. | V1.1 Architecture Baseline, TDD, Security Architecture | Architecture baseline defined; server implementation pending | Task 021 architecture evidence |
+| AX-AR-006 | Axeon Map shall use an administrator-managed registry of approved investigation object profiles for Work Orders, Service Requests, Incidents, and approved custom objects rather than exposing arbitrary data objects. | V1.1 Architecture Baseline, FDD, TDD | Architecture baseline defined; registry/configuration implementation pending | Task 021 architecture evidence |
+| AX-NFR-SEC-010 | Axeon Map shall require authenticated user context before network data APIs are made available, with future SSO integrated at the server authentication boundary. | V1.1 Architecture Baseline, Security Architecture | Architecture baseline defined; authentication implementation pending | Task 021 architecture evidence |
+| AX-NFR-SEC-011 | Restricted read-only database connectivity shall not be treated as equivalent to current-user Maximo authorization; authorization shall be enforced before Axeon receives data. | V1.1 Architecture Baseline, Security Architecture | Architecture baseline defined; approved integration design and MAS proof pending | Task 021 architecture evidence |

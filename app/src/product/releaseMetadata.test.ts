@@ -6,14 +6,14 @@ import { AXEON_RELEASE, axeonVersionLabel, type ProductReleaseMetadata } from '.
 
 test('central release metadata identifies the development product version', () => {
   const typed: ProductReleaseMetadata = AXEON_RELEASE;
-  expect(typed).toEqual({ productName: 'Axeon Map', version: '1.0.0-dev', channel: 'development' });
+  expect(typed).toEqual({ productName: 'Axeon Map', version: '1.1.0-dev', channel: 'development' });
   expect(packageMetadata.version).toBe(typed.version);
-  expect(axeonVersionLabel()).toBe('AXEON MAP · Version 1.0.0-dev');
+  expect(axeonVersionLabel()).toBe('AXEON MAP · Version 1.1.0-dev');
 });
 
 test('application and report presentation contain no independent version literal', () => {
   expect(appFooterSource).toContain('axeonVersionLabel');
   expect(reportSource).toContain('load.report.release.version');
-  expect(appFooterSource).not.toContain('1.0.0-dev');
-  expect(reportSource).not.toContain('1.0.0-dev');
+  expect(appFooterSource).not.toContain('1.1.0-dev');
+  expect(reportSource).not.toContain('1.1.0-dev');
 });

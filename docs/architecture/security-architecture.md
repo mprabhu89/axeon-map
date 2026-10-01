@@ -42,3 +42,7 @@ The report snapshot is a presentation handoff, not authorization or a new data s
 The governing invariant is: **Axeon must never retrieve, analyze, display, export, report, persist, log, or send to AI data that the current Maximo user is not authorized to access.** The trust chain is authenticated user, Maximo authentication, Maximo authorization, authorized APIs/Object Structures, Real Adapter, normalized bounded DTOs, Axeon capabilities, then an optional minimized Context Pack. Every retained client object is untrusted metadata, never authorization.
 
 `support/logger.ts` emits allowlisted technical/security metadata only. It records no Work Order values, paths, filters, findings, AI content, raw errors, credentials, endpoints, SQL, or Maximo payload. Report snapshots and local persistence validate schema/shape/size and reject corrupt content safely. See [security controls](../security/axeon-security-and-data-protection.md) and the [logging standard](../security/axeon-logging-standard.md).
+
+## V1.1 server authorization boundary
+
+The planned self-hosted server must authenticate the caller before any data-bearing route, resolve only an approved object profile, and apply Maximo authorization before returning normalized bounded Axeon DTOs. A read-only Db2 or SQL Server connection is a separate technical restriction; it cannot be treated as proof of the current user's Maximo authorization. Database credentials and AI-provider secrets remain server-side. See the [V1.1 baseline](v1.1-architecture-baseline.md).

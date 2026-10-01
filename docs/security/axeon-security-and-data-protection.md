@@ -51,3 +51,7 @@ UI errors use safe, generic messages. They do not expose SQL, endpoints, Maximo 
 ## Production requirements still to validate
 
 A Real Adapter must bind every request to the current Maximo session, enforce authorization for each operation, normalize customer values, and be exercised against roles with different authorized populations. Production AI credentials and communication remain server-side. AX-DEP-001 remains a deployment target until tested in an authorized MAS environment.
+
+## V1.1 server transition
+
+For network deployment, a self-hosted Axeon server must authenticate users before data APIs are available, evaluate approved object-registry profiles, enforce authorization before producing DTOs, and retain database/provider secrets server-side. A restricted read-only Db2 or SQL Server account limits server connectivity but cannot substitute for user-specific Maximo authorization. The planned boundary and implementation sequence are in the [V1.1 architecture baseline](../architecture/v1.1-architecture-baseline.md).

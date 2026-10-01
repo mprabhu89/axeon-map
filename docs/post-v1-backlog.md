@@ -32,3 +32,11 @@
 - Validate Real Maximo Adapter authorization, API/Object Structure discovery, customer Work Type analytical mapping, and authorization-first behavior in an authorized MAS environment.
 - Define approved server-side provider gateway, production secret management, audit retention, monitoring, CSP/security headers, and incident procedures.
 - Preserve the planned Axeon Administration model: it may configure approved application/object profiles and fields, while Maximo Security continues to decide what the current user may access. Administration must not become an authorization bypass.
+
+## V1.1 delivery sequence
+
+- Task 022: select and scaffold the self-hosted server foundation, authenticated-principal contract, server-only configuration boundary, and validated object-registry model without connecting to Maximo or a database.
+- Follow with mandatory authentication/session implementation before exposing any network data API.
+- Validate one approved, authorization-preserving Maximo API adapter before adding restricted Db2 or SQL Server read-only adapters.
+- Add database connectivity only with least-privilege accounts, parameterized reviewed operations, authorization propagation, bounds, auditing, and customer approval.
+- Add administration UI, SSO integration, customer object profiles, and customer Work Type mappings only after their server-side authorization/governance boundaries are established.

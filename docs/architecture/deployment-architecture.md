@@ -22,13 +22,17 @@ Task 016 adds provider-neutral structured path/filter DTOs and a bounded filter-
 
 Task 020 adds no production runtime or external connection. The intended target remains Maximo Manage 7.6.1.x deployment through supported Application Configuration/MAF and Manage configuration/publishing. MAS 9.2+ and later portability, session/browser policy, API behavior, headers, and AI-gateway hosting require authorized-environment validation. No Maximo core modification, customer rebuild, credential, endpoint, or Object Structure is assumed.
 
+## V1.1 self-hosted application target
+
+V1.1 plans a self-hosted Axeon server behind the browser UI. The server is the only location for database credentials, Maximo integration configuration, authentication/session handling, administrator object-registry configuration, and AI-provider secrets. Task 021 adds this design only; it does not select a hosting platform, server runtime, authentication protocol, database driver, endpoint, or secret store.
+
 ## Task 017 deployment boundary
 
 Task 017 adds no deployment runtime. Adapter selection is explicit: Mock is active locally and Real Maximo is not configured. The future Real Adapter must discover supported APIs/Object Structures and session/security behavior in an authorized MAS environment, normalize responses, declare verified capabilities, and fail closed when unavailable. AX-DEP-001 remains a target rather than a validated deployment claim.
 
 ## Task 018 release convention
 
-Axeon Map uses `MAJOR.MINOR.PATCH[-PRERELEASE]`. `1.0.0-dev` remains a development artifact and makes no certification or formal-release claim. Future packaging must consume the same version identity; no MAS package ID, IBM identifier, deployment endpoint, or certification status is inferred. AX-DEP-001 remains unvalidated.
+Axeon Map uses `MAJOR.MINOR.PATCH[-PRERELEASE]`. The current `1.1.0-dev` build remains a development artifact and makes no certification or formal-release claim. Future packaging must consume the same version identity; no MAS package ID, IBM identifier, deployment endpoint, or certification status is inferred. AX-DEP-001 remains unvalidated.
 
 ## Task 019 browser-context boundary
 

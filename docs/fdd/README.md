@@ -145,6 +145,12 @@ Filter values, including Work Type and all six exploration domains, remain adapt
 
 ## Product identity and approved UX refinement (Task 018)
 
-Axeon Map displays its current `1.0.0-dev` identity subtly at the application bottom and in Investigation Report provenance. The prerelease suffix identifies a development build rather than a formal 1.0.0 release. The application and report derive the version from one typed release contract backed by package metadata.
+Axeon Map previously established its central release-identity mechanism in Task 018. The current development identity is `1.1.0-dev`, derived by the application and report from the typed contract backed by package metadata; its prerelease suffix does not indicate a formal release.
 
 The Open Records modal uses a dependency-free top-right close icon with the accessible name **Close**, title tooltip, native button behavior, initial focus, Escape closure, and focus return to **Open Records**. Other accepted dialogs retain their textual Close controls.
+
+## V1.1 architecture baseline (Task 021)
+
+The V1.1 development baseline preserves all current investigation behavior while planning a self-hosted Axeon server for configuration, authentication, object governance, data access, and AI-provider integration. Work Orders, Service Requests, Incidents, and approved custom objects will be governed by an administrator-managed registry of approved profiles rather than arbitrary database objects. The registry determines what Axeon exposes; Maximo security determines what a user may access.
+
+Mandatory authentication is required before network data APIs are deployed. Read-only Db2 or SQL Server access will be a restricted server-side connection only and does not replace Maximo authorization. The current Mock Adapter and synthetic data remain the local development path. Task 021 adds no server, database connection, authentication, administration UI, or visible workflow change.

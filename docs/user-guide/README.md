@@ -102,10 +102,10 @@ Filtered counts, candidate groups, Operational Findings, explicit AI requests, O
 
 ## Development data and security notice
 
-This `1.0.0-dev` build uses fictitious local Work Order data, a development scope marker, and a deterministic Mock AI Provider. These disclosures do not represent real Maximo authorization, a production AI connection, or a formal release. Export, report, and Node Intelligence actions use the represented local context; browser storage retains only Saved/Recent metadata or short-lived report snapshots. Do not place customer credentials or production data in this local build.
+This `1.1.0-dev` build uses fictitious local Work Order data, a development scope marker, and a deterministic Mock AI Provider. These disclosures do not represent real Maximo authorization, a production AI connection, or a formal release. Export, report, and Node Intelligence actions use the represented local context; browser storage retains only Saved/Recent metadata or short-lived report snapshots. Do not place customer credentials or production data in this local build.
 
 ## Product version
 
-The bottom of the application shows **AXEON MAP � Version 1.0.0-dev**. Investigation Report provenance shows the same version. `-dev` identifies the current development build and must not be interpreted as a formal 1.0.0 release, IBM product identity, or Maximo certification.
+The bottom of the application and Investigation Report provenance display the centrally sourced **Axeon Map 1.1.0-dev** version. The `-dev` suffix identifies a development build and must not be interpreted as a formal release, IBM product identity, or Maximo certification.
 
 In Open Records, use the top-right **�** control, whose accessible name and tooltip are **Close**, or press Escape. Inspection remains intact and focus returns to the Open Records action.

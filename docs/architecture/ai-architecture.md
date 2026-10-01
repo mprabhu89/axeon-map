@@ -55,3 +55,7 @@ The adapter security context now propagates through analytical evidence and Cont
 ## Task 020 AI data protection
 
 The Context Pack remains the minimum authorized information needed for one explicit question: exact represented path/filter context, population, concise deterministic findings, scope marker, reference time, and normalized question. It never contains raw records, browser storage, exports, credentials, or unrelated candidates. Context Pack values remain data; a future provider prompt must reject instructions embedded in Maximo or user content. The local Mock provider makes no network call, and Context Packs/answers are neither persisted nor logged.
+
+## V1.1 server gateway transition
+
+The browser Context Pack remains an Axeon semantic contract. In network deployment, the server authenticates and authorizes the request, rebuilds or validates the minimum context from authorized DTOs, and then calls an approved provider gateway. Provider secrets, provider-specific requests, and provider network communication remain server-side. AI cannot access Maximo, Db2, SQL Server, or generated SQL directly.
