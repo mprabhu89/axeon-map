@@ -1,0 +1,136 @@
+import type { WorkOrderAnalyticalEvidence } from './workOrderEvidence';
+
+export interface SyntheticWorkOrder extends WorkOrderAnalyticalEvidence {
+  id: string;
+  site: string;
+  status: string;
+  priority: number;
+  classification: string;
+  location: string;
+  asset: string | null;
+  workType: 'PM' | 'CM' | 'EM';
+}
+
+interface SitePlan {
+  code: string;
+  count: number;
+  statusWeights: readonly number[];
+  classificationWeights: readonly number[];
+  workTypeWeights: readonly number[];
+}
+
+// Counts and weights are fixed, fictitious fixture parameters; no random source is used.
+const sites: readonly SitePlan[] = [
+  { code: 'SITE-A', count: 560, statusWeights: [42, 28, 22, 8], classificationWeights: [46, 28, 16, 10], workTypeWeights: [28, 62, 10] },
+  { code: 'SITE-B', count: 430, statusWeights: [32, 38, 24, 6], classificationWeights: [25, 48, 17, 10], workTypeWeights: [30, 60, 10] },
+  { code: 'SITE-C', count: 360, statusWeights: [48, 20, 24, 8], classificationWeights: [30, 24, 36, 10], workTypeWeights: [33, 58, 9] },
+  { code: 'SITE-D', count: 280, statusWeights: [24, 30, 38, 8], classificationWeights: [34, 34, 18, 14], workTypeWeights: [14, 61, 25] },
+  { code: 'SITE-E', count: 220, statusWeights: [36, 24, 32, 8], classificationWeights: [18, 30, 38, 14], workTypeWeights: [29, 61, 10] },
+  { code: 'SITE-F', count: 150, statusWeights: [28, 26, 36, 10], classificationWeights: [30, 22, 20, 28], workTypeWeights: [32, 58, 10] },
+];
+
+const statuses = ['WAPPR', 'INPRG', 'COMP', 'WSCH'] as const;
+const workTypes = ['PM', 'CM', 'EM'] as const;
+const reportAgeRanges = { WAPPR: [12, 42], INPRG: [18, 54], COMP: [45, 76], WSCH: [18, 56] } as const;
+const statusAgeRanges = { WAPPR: [3, 25], INPRG: [2, 14], COMP: [3, 27], WSCH: [4, 30] } as const;
+const classifications = ['Electrical', 'Mechanical', 'Instrumentation', 'Facilities'] as const;
+const locationNames = ['PLANT', 'YARD', 'UTILITY'] as const;
+const assetTypes = ['PUMP', 'FAN', 'SENSOR'] as const;
+export const SYNTHETIC_REFERENCE_DATE = '2026-09-01T00:00:00.000Z';
+const referenceTime = Date.parse(SYNTHETIC_REFERENCE_DATE);
+const dayMilliseconds = 86_400_000;
+
+function daysBeforeReference(days: number): string {
+  return new Date(referenceTime - days * dayMilliseconds).toISOString();
+}
+
+function daysAfter(date: string, days: number): string {
+  return new Date(Date.parse(date) + days * dayMilliseconds).toISOString();
+}
+
+function mix(value: number, salt: number): number {
+  let mixed = Math.imul(value ^ salt, 0x45d9f3b);
+  mixed ^= mixed >>> 16;
+  mixed = Math.imul(mixed, 0x45d9f3b);
+  return (mixed ^ (mixed >>> 16)) >>> 0;
+}
+
+function weightedIndex(value: number, weights: readonly number[]): number {
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  let remaining = value % total;
+  for (let index = 0; index < weights.length; index += 1) {
+    remaining -= weights[index]!;
+    if (remaining < 0) return index;
+  }
+  return weights.length - 1;
+}
+
+export function generateSyntheticWorkOrders(): SyntheticWorkOrder[] {
+  const records: SyntheticWorkOrder[] = [];
+  for (const site of sites) {
+    for (let localIndex = 0; localIndex < site.count; localIndex += 1) {
+      const sequence = records.length + 1;
+      const locationIndex = mix(sequence, 47) % locationNames.length;
+      const assetNumber = (mix(sequence, 89) % 4) + 1;
+      const prefix = site.code.slice(-1);
+      const status = statuses[weightedIndex(mix(sequence, 11), site.statusWeights)]!;
+      const classification = classifications[weightedIndex(mix(sequence, 31), site.classificationWeights)]!;
+      const generatedAsset = `${prefix}-${assetTypes[locationIndex]}-${String(assetNumber).padStart(2, '0')}`;
+      let workType: SyntheticWorkOrder['workType'] = workTypes[weightedIndex(mix(sequence, 61), site.workTypeWeights)]!;
+
+      // Small, deliberate fixture subsets: aged SITE-A approvals, repeated A-PUMP-01
+      // reactive work, and long-scheduled SITE-C PM work. Other records retain variety.
+      const agingSignal = site.code === 'SITE-A' && status === 'WAPPR'
+        && classification === 'Electrical' && sequence % 3 === 0;
+      const repeatSignal = generatedAsset === 'A-PUMP-01' && sequence % 5 === 0;
+      const bottleneckSignal = site.code === 'SITE-C' && status === 'WSCH' && sequence % 3 === 0;
+      if (repeatSignal) workType = sequence % 4 === 0 ? 'EM' : 'CM';
+      if (bottleneckSignal) workType = 'PM';
+      const riskSignal = site.code === 'SITE-F' && status === 'INPRG' && sequence % 5 === 0;
+      const missingAssetSignal = site.code === 'SITE-E' && (workType === 'CM' || workType === 'EM') && sequence % 13 === 0;
+      const asset = missingAssetSignal ? null : generatedAsset;
+
+      const [reportMinimum, reportSpan] = reportAgeRanges[status];
+      let reportAge = reportMinimum + mix(sequence, 71) % reportSpan;
+      if (agingSignal) reportAge = 115 + mix(sequence, 73) % 27;
+      if (bottleneckSignal) reportAge = 105 + mix(sequence, 73) % 25;
+      if (generatedAsset === 'A-PUMP-01' && !repeatSignal) reportAge = 42 + mix(sequence, 73) % 85;
+      if (repeatSignal) reportAge = 8 + mix(sequence, 73) % 22;
+      if (riskSignal) reportAge = 75 + mix(sequence, 107) % 16;
+
+      const [statusMinimum, statusSpan] = statusAgeRanges[status];
+      let statusAge = statusMinimum + mix(sequence, 79) % statusSpan;
+      if (agingSignal) statusAge = 100 + mix(sequence, 83) % 13;
+      if (bottleneckSignal) statusAge = 80 + mix(sequence, 83) % 16;
+      statusAge = Math.min(statusAge, reportAge - 2);
+
+      const reportDate = daysBeforeReference(reportAge);
+      const statusDate = daysBeforeReference(statusAge);
+      const hasTarget = status !== 'WAPPR' || agingSignal || sequence % 5 !== 0;
+      const targetStart = hasTarget ? daysAfter(reportDate, 3 + mix(sequence, 97) % 16) : null;
+      const targetFinish = targetStart ? daysAfter(targetStart, 3 + mix(sequence, 101) % 15) : null;
+      const lifecycleGap = reportAge - statusAge;
+      const actualStart = status === 'INPRG' || status === 'COMP'
+        ? daysAfter(reportDate, Math.max(1, Math.floor(lifecycleGap / 3))) : null;
+      const actualFinish = status === 'COMP'
+        ? daysAfter(reportDate, lifecycleGap - Math.min(sequence % 3, lifecycleGap - 2)) : null;
+      records.push({
+        id: `SYN-WO-${String(sequence).padStart(4, '0')}`,
+        site: site.code,
+        status,
+        priority: riskSignal ? 1 : weightedIndex(mix(sequence, 23), [12, 34, 36, 18]) + 1,
+        classification,
+        location: `${prefix}-${locationNames[locationIndex]}`,
+        asset,
+        workType,
+        reportDate,
+        statusDate,
+        targetStart,
+        targetFinish,
+        actualStart,
+        actualFinish,
+      });
+    }
+  }
+  return records;
+}

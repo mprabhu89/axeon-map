@@ -1,0 +1,28 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.tools/
+*.log
+*.tsbuildinfo
+
+# Editor and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python utility caches, if used later
+__pycache__/
+.pytest_cache/
+*.py[cod]
