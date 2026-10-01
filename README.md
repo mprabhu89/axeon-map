@@ -65,3 +65,38 @@ Task 022 adds the local Node.js/TypeScript server foundation in `app/server`. Ru
 Axeon releases use `MAJOR.MINOR.PATCH[-PRERELEASE]`. Development uses `-dev`, release candidates use forms such as `-rc.1`, and a formal release omits the suffix. Promote a future release by changing the version in `app/package.json` through the normal package-version workflow so its lockfile mirror stays aligned; product code must not duplicate the literal.
 
 Documentation sources are under [docs](docs/).
+
+## Local authentication (AX-023)
+
+The self-hosted Node server now requires a local Axeon account. It remains localhost-only by default and does not connect to Maximo. Create the first administrator once in PowerShell, keeping the password only in the current process:
+
+```powershell
+cd app
+$env:AXEON_BOOTSTRAP_ADMIN_USERNAME = 'axeon.admin'
+$securePassword = Read-Host 'Initial Axeon administrator password' -AsSecureString
+$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+$env:AXEON_BOOTSTRAP_ADMIN_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
+npm run build
+npm run server:bootstrap-admin
+Remove-Item Env:AXEON_BOOTSTRAP_ADMIN_PASSWORD
+npm run server:start
+```
+
+Open `http://127.0.0.1:3000`, sign in, and use **Sign out** to end the server session. The ignored local account store contains scrypt hashes rather than plaintext passwords. There is no self-registration, SSO, database connection, real-data API, or Maximo authorization in this checkpoint. Local Axeon authentication never grants Maximo data access.
+
+To create a further local account without an Administration Portal, an existing local administrator must provide their own current credentials only in the shell process, then run `npm run server:create-user`:
+
+```powershell
+$env:AXEON_ADMIN_USERNAME = 'axeon.admin'
+$adminSecurePassword = Read-Host 'Administrator password' -AsSecureString
+$adminBstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($adminSecurePassword)
+$env:AXEON_ADMIN_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($adminBstr)
+$env:AXEON_NEW_USERNAME = 'axeon.user'
+$newSecurePassword = Read-Host 'New user password' -AsSecureString
+$newBstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($newSecurePassword)
+$env:AXEON_NEW_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($newBstr)
+npm run server:create-user
+Remove-Item Env:AXEON_ADMIN_PASSWORD,Env:AXEON_NEW_PASSWORD
+```
+
+Use `AXEON_NEW_ROLE=user` by default or `administrator` only when appropriate. Clear the administrator and new-account password variables immediately after the command. This CLI is the local-development account-management mechanism, not the future Administration Portal.

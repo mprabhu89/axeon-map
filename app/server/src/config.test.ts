@@ -10,6 +10,12 @@ test('server configuration validates runtime settings and retains only safe refe
   });
   expect(configuration).toMatchObject({ environment: 'test', port: 3210, database: { provider: 'db2', enabled: true, connectionReference: 'vault/axeon-db2' } });
   expect(JSON.stringify(configuration)).not.toContain('must-not-appear');
+  expect(configuration.session.secureCookies).toBe(false);
+});
+
+test('production configuration marks session cookies Secure unless explicitly configured otherwise', () => {
+  expect(loadServerConfiguration({ NODE_ENV: 'production' }).session.secureCookies).toBe(true);
+  expect(loadServerConfiguration({ NODE_ENV: 'development', AXEON_COOKIE_SECURE: 'true' }).session.secureCookies).toBe(true);
 });
 
 test('server configuration rejects invalid ports, environments, providers, and database enablement', () => {

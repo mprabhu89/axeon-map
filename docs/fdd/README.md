@@ -157,6 +157,12 @@ Mandatory authentication is required before network data APIs are deployed. Read
 
 ## Secure application server foundation (Task 022)
 
+## Mandatory local authentication and protected sessions (Task 023)
+
+The self-hosted local server requires an administrator-created local Axeon account before rendering the investigation application. The initial account has no default credentials, public self-registration is unavailable, and account passwords are stored only as server-side scrypt hashes. The V1 React investigation UI and Mock Adapter remain unchanged after sign-in.
+
+The server creates opaque HttpOnly SameSite-protected sessions, uses Secure cookies for HTTPS/production configuration, expires inactive sessions, regenerates the session identifier at sign-in, invalidates it at logout, and requires a session CSRF token for state-changing actions. Administrator and User roles are server-enforced. Local Axeon identity is not Maximo authorization; future data routes must still authorize the user through Maximo before retrieving information.
+
 The V1 UI remains unchanged. Axeon now has a separate Node.js/TypeScript server foundation that serves the built browser application and exposes a versioned health endpoint. It intentionally exposes no Work Order, object, analytics, export, report, AI, Maximo, or database API. Future data APIs are contractually protected by authenticated-principal and authorization interfaces and must fail closed until authentication is implemented.
 
 The server owns validated non-secret configuration and a server-owned approved object-profile registry. Profiles support Work Orders, Service Requests, Incidents, Assets, and approved custom objects through allowed metadata only; they do not expose arbitrary SQL or grant Maximo permissions.

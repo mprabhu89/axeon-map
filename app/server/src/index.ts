@@ -1,9 +1,9 @@
 import { loadServerConfiguration } from './config.js';
-import { createAxeonHttpServer, closeAxeonHttpServer, listenAxeonHttpServer } from './httpServer.js';
+import { createAxeonHttpServer, closeAxeonHttpServer, createDefaultAuthenticationRuntime, listenAxeonHttpServer } from './httpServer.js';
 import { DEFAULT_OBJECT_PROFILE_REGISTRY } from './objectProfileRegistry.js';
 
 const configuration = loadServerConfiguration();
-const server = createAxeonHttpServer({ configuration, objectProfiles: DEFAULT_OBJECT_PROFILE_REGISTRY });
+const server = createAxeonHttpServer({ configuration, objectProfiles: DEFAULT_OBJECT_PROFILE_REGISTRY, authentication: createDefaultAuthenticationRuntime(configuration) });
 
 await listenAxeonHttpServer(server, configuration);
 console.info(`Axeon Map server listening on ${configuration.host}:${configuration.port}`);

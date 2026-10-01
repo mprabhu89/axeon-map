@@ -41,3 +41,7 @@ Axeon Map uses `MAJOR.MINOR.PATCH[-PRERELEASE]`. The current `1.1.0-dev` build r
 ## Task 019 browser-context boundary
 
 The V1 report uses a same-origin browser tab/window and session-scoped snapshot handoff. A future Manage/MAF deployment must validate `window.open`, hash bootstrapping, same-origin target storage access, popup policy, scripted Close behavior, CSP, print behavior, and snapshot lifetime in an authorized MAS environment. No deployment endpoint, Maximo session mechanism, server report service, BIRT integration, or cross-origin transfer is introduced. AX-DEP-001 remains unvalidated.
+
+## AX-023 localhost authentication boundary
+
+AX-023 binds the Node server to `127.0.0.1` by default and is not a network deployment. It uses an HttpOnly SameSite=Strict session cookie, adding `Secure` in production/HTTPS configuration. Before any network deployment, Axeon requires an approved TLS/reverse-proxy model, durable server-side session storage, account lifecycle/governance or enterprise identity provider, authentication/audit monitoring, CSRF-origin review, secret management, and a proven Maximo authorization mapping. The local account store and local password CLI must not be treated as a production identity service. AX-DEP-001 remains unvalidated.

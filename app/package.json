@@ -9,7 +9,9 @@
     "typecheck": "tsc -b --pretty false && tsc -p server/tsconfig.json --noEmit",
     "test": "vitest run",
     "server:build": "tsc -p server/tsconfig.json",
-    "server:start": "node server/dist/index.js"
+    "server:start": "node server/dist/index.js",
+    "server:bootstrap-admin": "node server/dist/bootstrapAdmin.js",
+    "server:create-user": "node server/dist/createLocalAccount.js"
   },
   "dependencies": {
     "react": "^19.1.0",

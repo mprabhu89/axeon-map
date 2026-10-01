@@ -1,5 +1,9 @@
+export type AxeonRole = 'administrator' | 'user';
+
 export interface AuthenticatedPrincipal {
   readonly subjectId: string;
+  readonly username: string;
+  readonly role: AxeonRole;
   readonly authenticationMethod: 'password-session' | 'sso' | 'service';
   readonly issuedAt: string;
 }
@@ -29,4 +33,11 @@ export class ProtectedRouteError extends Error {
 export function requireAuthenticatedPrincipal(principal: AuthenticatedPrincipal | null | undefined): AuthenticatedPrincipal {
   if (!principal) throw new ProtectedRouteError('unauthenticated');
   return principal;
+}
+
+/** Future administrative routes must apply role authorization after authentication. */
+export function requireAdministrator(principal: AuthenticatedPrincipal | null | undefined): AuthenticatedPrincipal {
+  const authenticated = requireAuthenticatedPrincipal(principal);
+  if (authenticated.role !== 'administrator') throw new ProtectedRouteError('forbidden');
+  return authenticated;
 }

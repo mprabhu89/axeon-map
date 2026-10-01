@@ -352,6 +352,23 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .command-symbol { color: var(--accent); font-size: 18px; }
 .command-future { margin-left: auto; white-space: nowrap; font-size: 9px; letter-spacing: .1em; color: #8196a4; }
 .app-footer { min-height: 105px; padding: 12px 30px 78px; color: var(--subtle); border-top: 1px solid var(--border-soft); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+.authentication-screen { min-height: 100vh; display: grid; place-items: center; padding: 28px; color: var(--text); background: radial-gradient(circle at 20% 10%, #23434d 0, transparent 37%), #0a111a; }
+.authentication-card { width: min(440px, 100%); padding: 34px; background: #111d28; border: 1px solid #35525d; border-radius: 10px; box-shadow: 0 28px 80px #0008; }
+.authentication-brand { display: flex; align-items: center; gap: 11px; color: #f0f8f9; letter-spacing: .1em; font-size: 14px; }
+.authentication-brand small { display: block; margin-top: 3px; color: #8ea5ad; font-size: 8px; letter-spacing: .14em; }
+.authentication-eyebrow { margin: 32px 0 7px; color: var(--accent); font-size: 9px; font-weight: 700; letter-spacing: .13em; }
+.authentication-card h1 { margin: 0; color: #edf7f8; font-size: 25px; }
+.authentication-copy, .authentication-note { color: #9aadb5; font-size: 12px; line-height: 1.55; }
+.authentication-form { display: grid; gap: 15px; margin-top: 24px; }
+.authentication-form label { display: grid; gap: 7px; color: #d1e0e3; font-size: 12px; font-weight: 650; }
+.authentication-form input { width: 100%; padding: 11px 12px; color: #ecf6f7; background: #0a131d; border: 1px solid #3a5862; border-radius: 5px; }
+.authentication-form button { padding: 11px 14px; color: #061016; background: #68c7c6; border: 1px solid #8ce1df; border-radius: 5px; cursor: pointer; font-weight: 750; }
+.authentication-form button:disabled { opacity: .6; cursor: wait; }
+.authentication-error { margin: 0; color: #ffbdad; font-size: 12px; }
+.authentication-note { margin: 24px 0 0; padding-top: 18px; border-top: 1px solid #2d444d; font-size: 10px; }
+.authentication-loading { color: #b5c9ce; font-size: 13px; }
+.authentication-logout { position: fixed; z-index: 10; top: 14px; right: 18px; padding: 7px 10px; color: #cfe0e3; background: #152432e8; border: 1px solid #48636d; border-radius: 5px; cursor: pointer; font-size: 11px; }
+.authentication-logout:hover, .authentication-logout:focus-visible { color: #fff; border-color: #7ac4c5; outline: 2px solid transparent; }
 
 @media (max-width: 1100px) {
   .workspace { grid-template-columns: minmax(0, 1fr); }
@@ -398,6 +415,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
   .investigation-report-backdrop { position: static; overflow: visible; padding: 0; background: #fff; }
   .investigation-report-shell { width: 100%; min-height: 0; overflow: visible; border: 0; border-radius: 0; box-shadow: none; }
   .report-screen-only { display: none !important; }
+  .authentication-logout { display: none !important; }
   .report-print-only { display: block; }
   .report-cover { padding: 12mm 10mm 9mm; background: #173039 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .report-cover::after { display: none; }

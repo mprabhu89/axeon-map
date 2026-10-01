@@ -13,6 +13,7 @@
 - Enforce existing Maximo authorization for records, counts, aggregations, and every datum supplied to AI. Axeon must not bypass Maximo security.
 - MAPPERADMIN is a planned Maximo security group for organization-wide read/explore access, never a code bypass or automatic modification grant.
 - No browser/AI direct database access, arbitrary AI-generated SQL execution, autonomous Maximo updates in V1, separate Axeon credential store, or secrets in client/source.
+- For the self-hosted server, require an authenticated server-managed session before rendering the investigation application or accepting protected APIs. Local account hashes, session identifiers, and provider secrets remain server-side; local Axeon authentication never substitutes for current-user Maximo authorization.
 - Validate inputs; safely render untrusted Maximo text; avoid sensitive logs; use least privilege.
 - Saved/recent investigations store structured path/filter metadata only. Revalidate every restored path and filter through the adapter under the current user's Maximo authorization; persisted metadata never grants access.
 - Filters are structured population constraints, never Investigation Spine segments. Apply same-dimension values with OR and different dimensions with AND; every downstream capability must use the same authorized path-plus-filter context.

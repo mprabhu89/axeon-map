@@ -114,4 +114,18 @@ Presentation components contain no independent version literal. Diagnostic metad
 
 ## Task 020 safety components
 
+## Authentication components (Task 023)
+
+```mermaid
+flowchart LR
+    Gate[AuthenticationGate] --> API[Versioned session/login/logout API]
+    API --> Provider[AxeonAuthenticationProvider]
+    Provider --> Store[LocalAccountStore]
+    API --> Sessions[SessionManager]
+    Sessions --> Principal[AuthenticatedPrincipal]
+    Principal --> Future[Future authorization + adapter operations]
+```
+
+`AuthenticationGate` is the only browser authentication integration. It presents the local sign-in page until `GET /api/v1/session` resolves an active server session, retains the CSRF token only in component memory, and exposes a native sign-out control. The React investigation and report surfaces remain unchanged children of that gate. Local password authentication and future OIDC/SAML authentication conform to the provider-independent server port; the provider does not reach Maximo or a database.
+
 `support/logger.ts` is the single structured diagnostic entry point. React components continue consuming normalized DTOs and generic safe errors; they do not log raw values or render untrusted HTML. The unused global “COMING LATER” command-bar placeholder was removed from the application shell because contextual Node Intelligence is the implemented AI entry point.

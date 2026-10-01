@@ -26,6 +26,13 @@ export interface AxeonServerConfiguration {
   readonly port: number;
   readonly staticDirectory: string;
   readonly maxRequestBodyBytes: number;
+  /** Local development account storage. This is a path, never a credential. */
+  readonly accountStorePath: string;
+  readonly session: Readonly<{
+    readonly maxLifetimeMs: number;
+    readonly inactivityTimeoutMs: number;
+    readonly secureCookies: boolean;
+  }>;
   readonly database: FutureDatabaseConfiguration;
   readonly maximo: FutureMaximoConfiguration;
   readonly ai: FutureAIConfiguration;
@@ -69,6 +76,12 @@ export function loadServerConfiguration(environment: NodeJS.ProcessEnv = process
     port: parsePort(environment.AXEON_SERVER_PORT),
     staticDirectory: resolve(environment.AXEON_STATIC_DIRECTORY ?? resolve(process.cwd(), 'dist')),
     maxRequestBodyBytes: 16 * 1024,
+    accountStorePath: resolve(environment.AXEON_ACCOUNT_STORE_PATH ?? resolve(process.cwd(), '.axeon-local-accounts.json')),
+    session: Object.freeze({
+      maxLifetimeMs: 8 * 60 * 60 * 1000,
+      inactivityTimeoutMs: 30 * 60 * 1000,
+      secureCookies: environment.AXEON_COOKIE_SECURE === undefined ? runtimeEnvironment === 'production' : parseBoolean(environment.AXEON_COOKIE_SECURE, 'AXEON_COOKIE_SECURE'),
+    }),
     database: Object.freeze({ provider: databaseProvider, enabled: databaseEnabled, connectionReference: safeReference(environment.AXEON_DATABASE_CONNECTION_REFERENCE, 'AXEON_DATABASE_CONNECTION_REFERENCE') }),
     maximo: Object.freeze({ enabled: parseBoolean(environment.AXEON_MAXIMO_ENABLED, 'AXEON_MAXIMO_ENABLED'), integrationReference: safeReference(environment.AXEON_MAXIMO_INTEGRATION_REFERENCE, 'AXEON_MAXIMO_INTEGRATION_REFERENCE') }),
     ai: Object.freeze({ enabled: parseBoolean(environment.AXEON_AI_ENABLED, 'AXEON_AI_ENABLED'), providerReference: safeReference(environment.AXEON_AI_PROVIDER_REFERENCE, 'AXEON_AI_PROVIDER_REFERENCE') }),

@@ -57,3 +57,7 @@ Snapshots use the `axeon:report-snapshot:` namespace and an `axeon:report-snapsh
 ## Task 020 local security controls
 
 The development shell retains only fictitious data. Its structured logger records allowlisted metadata, while report and persistence validation reject malformed local state. These controls are described in [security documentation](../security/axeon-security-and-data-protection.md); they do not replace Real Adapter authorization or a production audit service.
+
+## AX-023 local authentication development path
+
+The built Node server, rather than Vite alone, is the signed-in local development path. Its bootstrap command creates the first local administrator from shell-only credentials; `server:create-user` requires an existing local administrator and creates a User or Administrator hash record. Tests use temporary account files. The ignored local account file and in-memory session store are development controls only, intentionally unsuitable as a multi-instance or network-deployed identity store. Vite retains its existing UI workflow but needs the local Node server running at `127.0.0.1:3000` to proxy the authentication API.

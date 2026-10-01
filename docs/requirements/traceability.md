@@ -105,3 +105,11 @@ Acceptance evidence will be linked from [test evidence](../test-evidence/README.
 | AX-NFR-SEC-012 | Axeon server configuration shall validate non-secret runtime settings and server-side reference identifiers without exposing credentials or internal configuration through browser responses. | TDD, Security Architecture | Implemented locally | Task 022 configuration tests |
 | AX-NFR-SEC-013 | Future Axeon data operations shall require an authenticated principal before object-profile resolution, authorization evaluation, or adapter execution. | V1.1 Architecture Baseline, TDD, Security Architecture | Contract implemented; authentication transport pending | Task 022 protected-contract tests |
 | AX-AR-008 | Axeon shall validate server-owned approved object profiles and reject arbitrary query, endpoint, credential, connection, or permission-bearing configuration. | V1.1 Architecture Baseline, TDD | Implemented locally | Task 022 object-registry tests |
+
+## Task 023 authentication and protected-session requirements
+
+| ID | Requirement | Design source | Status | Evidence |
+| --- | --- | --- | --- |
+| AX-NFR-SEC-014 | Axeon Map shall require an authenticated server-managed session before rendering its self-hosted investigation application or accepting protected server API requests. | V1.1 Architecture Baseline, FDD, TDD, Security Architecture | Implemented for local server sessions; real-data APIs and network deployment remain out of scope | Task 023 authentication/session tests |
+| AX-NFR-SEC-015 | Axeon local account credentials shall be hashed server-side, session identifiers shall use HttpOnly SameSite-protected cookies, and state-changing session operations shall require CSRF verification. | FDD, TDD, Security Architecture | Implemented locally with scrypt, generated sessions, expiry/inactivity limits, and CSRF checks | Task 023 password/session/HTTP tests |
+| AX-AR-009 | Axeon authentication providers shall map authenticated identities into a provider-independent principal and server-session contract so future OIDC or SAML integration does not change investigation or adapter contracts. | V1.1 Architecture Baseline, Component Architecture, Security Architecture | Local password provider implemented; OIDC/SAML deferred | Task 023 provider contract tests |

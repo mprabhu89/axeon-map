@@ -3,6 +3,8 @@
 .env.*
 !.env.example
 *.local
+.axeon-local-accounts.json
+.axeon-local-accounts.json.*
 *.pem
 *.key
 

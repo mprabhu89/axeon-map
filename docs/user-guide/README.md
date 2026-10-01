@@ -102,6 +102,12 @@ Filtered counts, candidate groups, Operational Findings, explicit AI requests, O
 
 ## Development data and security notice
 
+## Local sign-in (Task 023)
+
+When Axeon Map is served by the local Node server, it first displays a dark Axeon sign-in screen. An administrator creates the initial local account through the documented server bootstrap command; users cannot register themselves. Enter that local username and password, then select **Sign in**. The existing Mock investigation workspace, records, filters, reports, deterministic findings, and Mock AI behavior continue after sign-in.
+
+Use **Sign out** in the upper right to end the session. Axeon returns to the sign-in screen when a session expires. Local sign-in protects only the Axeon server session. It neither grants access to Maximo data nor replaces future Maximo authorization. The Vite-only development server has no authentication API; use the Node server for the signed-in local flow.
+
 This `1.1.0-dev` build uses fictitious local Work Order data, a development scope marker, and a deterministic Mock AI Provider. These disclosures do not represent real Maximo authorization, a production AI connection, or a formal release. Export, report, and Node Intelligence actions use the represented local context; browser storage retains only Saved/Recent metadata or short-lived report snapshots. Do not place customer credentials or production data in this local build.
 
 ## Product version

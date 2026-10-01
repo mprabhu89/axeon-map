@@ -49,4 +49,12 @@ The planned self-hosted server must authenticate the caller before any data-bear
 
 ## AX-022 server controls
 
+## Local authentication and protected sessions (Task 023)
+
+The Node server owns local account verification and server-managed sessions. A local account is created only by the one-time administrator bootstrap command and stores a configured `scrypt` hash, never a plaintext password. Login responses are generic, repeated failures are throttled, and public self-registration is absent. The local account file is Git-ignored and server-side only.
+
+The browser receives an opaque HttpOnly `SameSite=Strict` session cookie. `Secure` is enabled in production/HTTPS configuration. Session identifiers and CSRF secrets are random, server-managed, rotated on successful authentication, expired after eight hours or 30 minutes inactive, and invalidated at logout. Browser JavaScript receives only a transient CSRF token for the active session; it does not use localStorage for credentials or authentication tokens. State-changing endpoints require that token, and server-side role checks require an `administrator` principal before the reserved account-management contract can proceed.
+
+This local Axeon principal is not a Maximo authorization identity. Before future data access, the server must map or federate the authenticated user through a supported Maximo authorization design, then retrieve only permitted normalized records, aggregates, evidence, exports, reports, and AI Context Pack data. A Db2 or SQL Server read account cannot substitute for that user-specific authorization proof. Future OIDC/SAML providers plug into the authentication-provider port; production secrets and network provider configuration remain server-side.
+
 The foundation exposes only a public health route and static browser assets. It has no data route and no authentication bypass. Future protected operations use `requireAuthenticatedPrincipal` before object profile or adapter work. The configuration loader accepts safe references rather than credential values, the registry rejects query-bearing configuration, static path traversal is rejected, request bodies are bounded, and API errors disclose no internal configuration.

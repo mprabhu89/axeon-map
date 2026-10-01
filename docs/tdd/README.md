@@ -285,6 +285,12 @@ An object profile will define a stable ID, display metadata, enabled state, appr
 
 ## AX-022 secure server implementation
 
+## AX-023 authentication implementation
+
+`LocalAccountStore` is a server-only JSON development store behind a small account port. It validates normalized usernames, stores a schema-v1 account record with a `scrypt` hash, and permits bootstrap only while it is empty. `AxeonAuthenticationProvider` maps a password attempt to either a generic invalid/throttled outcome or a provider-independent `AuthenticatedPrincipal`. Future OIDC/SAML providers use that same contract.
+
+`SessionManager` is an in-memory server session port for local development. It owns random session IDs and CSRF tokens, absolute and inactivity expiry, activity refresh, and invalidation. `httpServer` exposes only session introspection, login, and logout beside health; it uses HttpOnly SameSite=Strict cookies, production/HTTPS Secure configuration, generic authentication errors, a keyed in-memory login throttle, and CSRF checks for logout. There are still no server data APIs. The browser `AuthenticationGate` retains a CSRF token only in React memory and gates both the investigation and report surfaces. Local account/session storage is intentionally not the future production session store; deployment must supply durable session storage, TLS/reverse proxy policy, OIDC/SAML selection, account lifecycle governance, and Maximo user-authorization mapping.
+
 `app/server` compiles independently with NodeNext TypeScript and native Node HTTP APIs. `server:build` produces its executable; `server:start` serves the Vite build directory. `GET /api/v1/health` is the sole versioned public API. API routes otherwise return a consistent safe response, static paths are contained under the build directory, request size is limited to 16 KiB, and close primitives support SIGINT/SIGTERM shutdown.
 
 `loadServerConfiguration` validates host, port, environment, boolean toggles, provider names, and safe reference identifiers. It has no password, token, endpoint, or connection-string field. `AuthenticatedPrincipal`, `AuthorizationService`, and `requireAuthenticatedPrincipal` define the future protected-operation entry point without creating a mock identity. `ObjectProfileRegistry` validates server-owned profiles and rejects implementation/query/security keys. No adapter, network client, database driver, server-side AI gateway, or authentication transport is implemented.
