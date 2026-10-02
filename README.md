@@ -84,7 +84,7 @@ npm run server:start
 
 Open `http://127.0.0.1:3000`, sign in, and use **Sign out** to end the server session. The ignored local account store contains scrypt hashes rather than plaintext passwords. There is no self-registration, SSO, database connection, real-data API, or Maximo authorization in this checkpoint. Local Axeon authentication never grants Maximo data access.
 
-To create a further local account without an Administration Portal, an existing local administrator must provide their own current credentials only in the shell process, then run `npm run server:create-user`:
+To create a further local account without an Administration Portal, an existing local administrator must provide their own current credentials only in the shell process, then run `npm run server:create-user`. The account store defaults to the Axeon `app` directory regardless of the command launch directory; `AXEON_ACCOUNT_STORE_PATH` may be set only when the server and CLI are deliberately configured to use the same alternate server-side store:
 
 ```powershell
 $env:AXEON_ADMIN_USERNAME = 'axeon.admin'
@@ -100,3 +100,11 @@ Remove-Item Env:AXEON_ADMIN_PASSWORD,Env:AXEON_NEW_PASSWORD
 ```
 
 Use `AXEON_NEW_ROLE=user` by default or `administrator` only when appropriate. Clear the administrator and new-account password variables immediately after the command. This CLI is the local-development account-management mechanism, not the future Administration Portal.
+
+If account creation cannot verify the administrator, the CLI prints a local-only safe diagnostic with the effective account-store path and one verification status: missing account, non-administrator role, or password not verified. It never prints passwords, password hashes, account contents, or session values. A server and CLI using an explicit `AXEON_ACCOUNT_STORE_PATH` must receive the same path value.
+
+## Synthetic SQLite authorization proof (AX-024)
+
+The browser remains in Mock Adapter mode by default. To initialize the separate, server-only local SQLite proof fixture, run `npm run build` then `npm run server:init-synthetic-db` from `app`. Set `AXEON_SYNTHETIC_DATABASE_ENABLED=true` before `npm run server:start` to expose only authenticated Site aggregate and 20-record preview proof endpoints. The fixture is fictitious, Git-ignored, deterministic, and never created by a normal investigation request. Details and seeded test-account names are in [Task 024 evidence](docs/test-evidence/task-024.md).
+
+For signed-in local API verification, use one host consistently: `http://127.0.0.1`. Vite development now binds to `http://127.0.0.1:5173` and proxies `/api` to the local server; direct server/API tabs use `http://127.0.0.1:3000`. Do not mix `localhost` and `127.0.0.1`, because the secure host-only session cookie must not cross origins.

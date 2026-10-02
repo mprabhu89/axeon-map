@@ -7,9 +7,10 @@ import { createLocalAuthenticationProvider, type AxeonAuthenticationProvider } f
 import type { ObjectProfileRegistry } from './objectProfileRegistry.js';
 import { requireAdministrator } from './authentication.js';
 import { clearSessionCookie, createSessionManager, csrfTokenMatches, parseSessionCookie, sessionCookie, type SessionManager } from './sessions.js';
+import { createSyntheticSqliteWorkOrderRepository, SyntheticDatabaseError, type WorkOrderInvestigationDataPort } from './syntheticDatabase.js';
 
 export interface AxeonAuthenticationRuntime { readonly provider: AxeonAuthenticationProvider; readonly sessions: SessionManager; }
-export interface AxeonHttpServerOptions { readonly configuration: AxeonServerConfiguration; readonly objectProfiles: ObjectProfileRegistry; readonly authentication?: AxeonAuthenticationRuntime; }
+export interface AxeonHttpServerOptions { readonly configuration: AxeonServerConfiguration; readonly objectProfiles: ObjectProfileRegistry; readonly authentication?: AxeonAuthenticationRuntime; readonly workOrderData?: WorkOrderInvestigationDataPort | null; }
 
 const contentTypes: Readonly<Record<string, string>> = Object.freeze({
   '.css': 'text/css; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon',
@@ -53,13 +54,17 @@ function sessionFrom(request: IncomingMessage, runtime: AxeonAuthenticationRunti
 export function createDefaultAuthenticationRuntime(configuration: AxeonServerConfiguration): AxeonAuthenticationRuntime {
   return Object.freeze({ provider: createLocalAuthenticationProvider(createLocalAccountStore(configuration.accountStorePath)), sessions: createSessionManager(configuration.session) });
 }
+export function createConfiguredWorkOrderData(configuration: AxeonServerConfiguration): WorkOrderInvestigationDataPort | null {
+  return configuration.syntheticDatabase.enabled ? createSyntheticSqliteWorkOrderRepository(configuration.syntheticDatabase.filePath) : null;
+}
 export function createAxeonHttpServer(options: AxeonHttpServerOptions): Server {
   const authentication = options.authentication ?? createDefaultAuthenticationRuntime(options.configuration);
-  return createServer((request, response) => { void handleRequest(request, response, options.configuration, authentication); });
+  const workOrderData = options.workOrderData ?? createConfiguredWorkOrderData(options.configuration);
+  return createServer((request, response) => { void handleRequest(request, response, options.configuration, authentication, workOrderData); });
 }
-async function handleRequest(request: IncomingMessage, response: ServerResponse, configuration: AxeonServerConfiguration, authentication: AxeonAuthenticationRuntime): Promise<void> {
+async function handleRequest(request: IncomingMessage, response: ServerResponse, configuration: AxeonServerConfiguration, authentication: AxeonAuthenticationRuntime, workOrderData: WorkOrderInvestigationDataPort | null): Promise<void> {
   try {
-    const pathname = new URL(request.url ?? '/', 'http://axeon.local').pathname;
+    const url = new URL(request.url ?? '/', 'http://axeon.local'); const pathname = url.pathname;
     if (requestExceedsLimit(request, configuration.maxRequestBodyBytes)) return sendError(response, 413, 'request-too-large', 'The request exceeds the allowed size.');
     if (request.method === 'GET' && pathname === '/api/v1/health') return sendJson(response, 200, { status: 'ok', apiVersion: 'v1', service: 'axeon-map' });
     if (request.method === 'GET' && pathname === '/api/v1/session') {
@@ -82,6 +87,19 @@ async function handleRequest(request: IncomingMessage, response: ServerResponse,
       if (!csrfTokenMatches(result.session, Array.isArray(csrfHeader) ? csrfHeader[0] : csrfHeader)) return sendError(response, 403, 'csrf-rejected', 'The request could not be verified.');
       authentication.sessions.destroy(result.session.id); return sendJson(response, 204, undefined, { 'Set-Cookie': clearSessionCookie(configuration.session.secureCookies) });
     }
+    if (request.method === 'GET' && pathname === '/api/v1/work-orders/site-aggregate') {
+      const result = sessionFrom(request, authentication); if (result.status !== 'active') return sendError(response, 401, 'unauthenticated', 'Authentication is required.');
+      if (!workOrderData) return sendError(response, 503, 'data-unavailable', 'The configured data source is unavailable.');
+      const aggregate = workOrderData.aggregateBySite(result.session.principal);
+      return sendJson(response, 200, { totalCount: aggregate.totalCount, groups: aggregate.groups });
+    }
+    if (request.method === 'GET' && pathname === '/api/v1/work-orders/preview') {
+      const result = sessionFrom(request, authentication); if (result.status !== 'active') return sendError(response, 401, 'unauthenticated', 'Authentication is required.');
+      if (!workOrderData) return sendError(response, 503, 'data-unavailable', 'The configured data source is unavailable.');
+      const offsetText = url.searchParams.get('offset') ?? '0'; const offset = Number(offsetText); const site = url.searchParams.get('site') ?? undefined;
+      const preview = workOrderData.previewWorkOrders(result.session.principal, { site, offset });
+      return sendJson(response, 200, { totalCount: preview.totalCount, records: preview.records, limit: 20, offset });
+    }
     /* Account management is deliberately absent; this endpoint proves future operations are role-gated server-side. */
     if (pathname === '/api/v1/admin/accounts') {
       const result = sessionFrom(request, authentication);
@@ -92,7 +110,11 @@ async function handleRequest(request: IncomingMessage, response: ServerResponse,
     if (pathname.startsWith('/api/')) return sendError(response, 404, 'not-found', 'No protected data API is available in this release.');
     if (request.method !== 'GET' && request.method !== 'HEAD') return sendError(response, 405, 'method-not-allowed', 'Only read-only browser routes are available.');
     await serveStatic(response, configuration.staticDirectory, pathname);
-  } catch (error) { if (error instanceof HttpRequestError) return sendError(response, error.status, error.code, error.safeMessage); return sendError(response, 500, 'server-error', 'Axeon could not complete this request.'); }
+  } catch (error) {
+    if (error instanceof HttpRequestError) return sendError(response, error.status, error.code, error.safeMessage);
+    if (error instanceof SyntheticDatabaseError) return sendError(response, error.code === 'unauthorized' ? 403 : error.code === 'invalid-request' ? 400 : 503, error.code === 'invalid-request' ? 'invalid-request' : error.code === 'unauthorized' ? 'forbidden' : 'data-unavailable', error.code === 'unauthorized' ? 'The current user is not authorized for this operation.' : error.code === 'invalid-request' ? 'The request is invalid.' : 'The configured data source is unavailable.');
+    return sendError(response, 500, 'server-error', 'Axeon could not complete this request.');
+  }
 }
 export async function listenAxeonHttpServer(server: Server, configuration: Pick<AxeonServerConfiguration, 'host' | 'port'>): Promise<void> { await new Promise<void>((resolveListening, rejectListening) => { server.once('error', rejectListening); server.listen(configuration.port, configuration.host, () => { server.removeListener('error', rejectListening); resolveListening(); }); }); }
 export async function closeAxeonHttpServer(server: Server): Promise<void> { await new Promise<void>((resolveClosing, rejectClosing) => server.close((error) => error ? rejectClosing(error) : resolveClosing())); }

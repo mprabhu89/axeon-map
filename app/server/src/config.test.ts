@@ -1,6 +1,7 @@
 // @vitest-environment node
+import { join } from 'node:path';
 import { expect, test } from 'vitest';
-import { loadServerConfiguration } from './config.js';
+import { loadServerConfiguration, resolveAxeonApplicationRoot } from './config.js';
 
 test('server configuration validates runtime settings and retains only safe references', () => {
   const configuration = loadServerConfiguration({
@@ -13,6 +14,12 @@ test('server configuration validates runtime settings and retains only safe refe
   expect(configuration.session.secureCookies).toBe(false);
 });
 
+test('default server state paths are anchored to the Axeon application root rather than the command working directory', () => {
+  const configuration = loadServerConfiguration({ NODE_ENV: 'test' });
+  expect(configuration.accountStorePath).toBe(join(resolveAxeonApplicationRoot(), '.axeon-local-accounts.json'));
+  expect(configuration.syntheticDatabase.filePath).toBe(join(resolveAxeonApplicationRoot(), '.axeon-synthetic-work-orders.sqlite'));
+});
+
 test('production configuration marks session cookies Secure unless explicitly configured otherwise', () => {
   expect(loadServerConfiguration({ NODE_ENV: 'production' }).session.secureCookies).toBe(true);
   expect(loadServerConfiguration({ NODE_ENV: 'development', AXEON_COOKIE_SECURE: 'true' }).session.secureCookies).toBe(true);
@@ -23,4 +30,5 @@ test('server configuration rejects invalid ports, environments, providers, and d
   expect(() => loadServerConfiguration({ AXEON_SERVER_PORT: '0' })).toThrow('AXEON_SERVER_PORT');
   expect(() => loadServerConfiguration({ AXEON_DATABASE_PROVIDER: 'oracle' })).toThrow('AXEON_DATABASE_PROVIDER');
   expect(() => loadServerConfiguration({ AXEON_DATABASE_ENABLED: 'true' })).toThrow('database provider');
+  expect(() => loadServerConfiguration({ NODE_ENV: 'production', AXEON_SYNTHETIC_DATABASE_ENABLED: 'true' })).toThrow('Synthetic SQLite');
 });

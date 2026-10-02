@@ -1,7 +1,14 @@
-import { resolve } from 'node:path';
+import { dirname, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export type ServerEnvironment = 'development' | 'test' | 'production';
 export type FutureDatabaseProvider = 'none' | 'db2' | 'sql-server';
+
+export interface SyntheticDatabaseConfiguration {
+  readonly enabled: boolean;
+  /** Local fictitious fixture path only; never a customer database path or credential. */
+  readonly filePath: string;
+}
 
 export interface FutureDatabaseConfiguration {
   readonly provider: FutureDatabaseProvider;
@@ -33,12 +40,25 @@ export interface AxeonServerConfiguration {
     readonly inactivityTimeoutMs: number;
     readonly secureCookies: boolean;
   }>;
+  readonly syntheticDatabase: SyntheticDatabaseConfiguration;
   readonly database: FutureDatabaseConfiguration;
   readonly maximo: FutureMaximoConfiguration;
   readonly ai: FutureAIConfiguration;
 }
 
 const validEnvironments = new Set<ServerEnvironment>(['development', 'test', 'production']);
+const moduleDirectory = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Server state must have one stable default regardless of the directory from
+ * which a built server command is launched. Source tests execute from
+ * `app/server/src`; built server commands execute from `app/server/dist/server/src`.
+ */
+export function resolveAxeonApplicationRoot(): string {
+  return resolve(moduleDirectory, moduleDirectory.includes(`${sep}dist${sep}`) ? '../../../..' : '../..');
+}
+
+const applicationRoot = resolveAxeonApplicationRoot();
 const parsePort = (value: string | undefined): number => {
   const parsed = Number(value ?? '3000');
   if (!Number.isInteger(parsed) || parsed < 1 || parsed > 65535) throw new Error('AXEON_SERVER_PORT must be an integer from 1 to 65535.');
@@ -69,18 +89,24 @@ export function loadServerConfiguration(environment: NodeJS.ProcessEnv = process
   const databaseEnabled = parseBoolean(environment.AXEON_DATABASE_ENABLED, 'AXEON_DATABASE_ENABLED');
   if (databaseEnabled && databaseProvider === 'none') throw new Error('A database provider is required when database access is enabled.');
   const host = environment.AXEON_SERVER_HOST ?? '127.0.0.1';
+  const syntheticDatabaseEnabled = parseBoolean(environment.AXEON_SYNTHETIC_DATABASE_ENABLED, 'AXEON_SYNTHETIC_DATABASE_ENABLED');
+  if (syntheticDatabaseEnabled && runtimeEnvironment === 'production') throw new Error('Synthetic SQLite mode is not available in production.');
   if (!/^[A-Za-z0-9.:-]{1,255}$/.test(host)) throw new Error('AXEON_SERVER_HOST is invalid.');
   return Object.freeze({
     environment: runtimeEnvironment,
     host,
     port: parsePort(environment.AXEON_SERVER_PORT),
-    staticDirectory: resolve(environment.AXEON_STATIC_DIRECTORY ?? resolve(process.cwd(), 'dist')),
+    staticDirectory: resolve(environment.AXEON_STATIC_DIRECTORY ?? resolve(applicationRoot, 'dist')),
     maxRequestBodyBytes: 16 * 1024,
-    accountStorePath: resolve(environment.AXEON_ACCOUNT_STORE_PATH ?? resolve(process.cwd(), '.axeon-local-accounts.json')),
+    accountStorePath: resolve(environment.AXEON_ACCOUNT_STORE_PATH ?? resolve(applicationRoot, '.axeon-local-accounts.json')),
     session: Object.freeze({
       maxLifetimeMs: 8 * 60 * 60 * 1000,
       inactivityTimeoutMs: 30 * 60 * 1000,
       secureCookies: environment.AXEON_COOKIE_SECURE === undefined ? runtimeEnvironment === 'production' : parseBoolean(environment.AXEON_COOKIE_SECURE, 'AXEON_COOKIE_SECURE'),
+    }),
+    syntheticDatabase: Object.freeze({
+      enabled: syntheticDatabaseEnabled,
+      filePath: resolve(environment.AXEON_SYNTHETIC_DATABASE_PATH ?? resolve(applicationRoot, '.axeon-synthetic-work-orders.sqlite')),
     }),
     database: Object.freeze({ provider: databaseProvider, enabled: databaseEnabled, connectionReference: safeReference(environment.AXEON_DATABASE_CONNECTION_REFERENCE, 'AXEON_DATABASE_CONNECTION_REFERENCE') }),
     maximo: Object.freeze({ enabled: parseBoolean(environment.AXEON_MAXIMO_ENABLED, 'AXEON_MAXIMO_ENABLED'), integrationReference: safeReference(environment.AXEON_MAXIMO_INTEGRATION_REFERENCE, 'AXEON_MAXIMO_INTEGRATION_REFERENCE') }),

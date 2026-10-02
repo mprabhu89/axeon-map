@@ -21,3 +21,10 @@ test('server sessions also enforce their absolute expiry despite valid activity'
   clock = 999; expect(sessions.resolve(session.id)).toMatchObject({ status: 'active' });
   clock = 1_000; expect(sessions.resolve(session.id)).toMatchObject({ status: 'expired' });
 });
+
+test('a server restart fails closed for an earlier in-memory session identifier', () => {
+  const beforeRestart = createSessionManager({ maxLifetimeMs: 10_000, inactivityTimeoutMs: 10_000 });
+  const session = beforeRestart.create(principal);
+  const afterRestart = createSessionManager({ maxLifetimeMs: 10_000, inactivityTimeoutMs: 10_000 });
+  expect(afterRestart.resolve(session.id)).toMatchObject({ status: 'missing' });
+});

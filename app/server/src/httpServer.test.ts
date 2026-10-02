@@ -6,6 +6,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createLocalAccountStore } from './localAccountStore.js';
+import { createSyntheticSqliteWorkOrderRepository, initializeSyntheticDatabase } from './syntheticDatabase.js';
 import { loadServerConfiguration } from './config.js';
 import { closeAxeonHttpServer, createAxeonHttpServer, listenAxeonHttpServer } from './httpServer.js';
 import { DEFAULT_OBJECT_PROFILE_REGISTRY } from './objectProfileRegistry.js';
@@ -74,4 +75,26 @@ test('local login creates a protected session, rejects CSRF omission, and logout
   expect((await send(port, '/api/v1/auth/logout', 'POST', { cookie })).status).toBe(403);
   const logout = await send(port, '/api/v1/auth/logout', 'POST', { cookie, 'x-csrf-token': session.csrfToken }); expect(logout.status).toBe(204); expect(String(logout.headers['set-cookie'])).toContain('Max-Age=0');
   expect((await get(port, '/api/v1/session', { cookie })).status).toBe(401);
+});
+
+test('one authenticated Site-A session remains valid across consecutive aggregate and preview requests and preserves site denial', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'axeon-server-sqlite-')); directories.push(directory);
+  const databasePath = join(directory, 'work-orders.sqlite'); initializeSyntheticDatabase(databasePath);
+  const configuration = { ...loadServerConfiguration({ NODE_ENV: 'test', AXEON_ACCOUNT_STORE_PATH: join(directory, 'accounts.json') }), host: '127.0.0.1', port: 0 };
+  const accounts = createLocalAccountStore(configuration.accountStorePath); await accounts.bootstrapAdministrator('axeon.admin', 'A-strong-local-password'); await accounts.create('site.a.user', 'A-strong-site-password', 'user'); await accounts.create('no.workorder.user', 'A-strong-no-workorder-password', 'user');
+  const workOrderData = createSyntheticSqliteWorkOrderRepository(databasePath); const server = createAxeonHttpServer({ configuration, objectProfiles: DEFAULT_OBJECT_PROFILE_REGISTRY, workOrderData }); servers.push(server); await listenAxeonHttpServer(server, configuration); const port = (server.address() as AddressInfo).port;
+  const login = async (username: string, password: string) => { const response = await send(port, '/api/v1/auth/login', 'POST', { 'content-type': 'application/json' }, JSON.stringify({ username, password })); return String(response.headers['set-cookie']); };
+  expect((await get(port, '/api/v1/work-orders/site-aggregate')).status).toBe(401);
+  const siteCookie = await login('site.a.user', 'A-strong-site-password'); const siteAggregate = await get(port, '/api/v1/work-orders/site-aggregate', { cookie: siteCookie }); expect(JSON.parse(siteAggregate.body)).toEqual({ totalCount: 560, groups: [{ site: 'SITE-A', count: 560 }] });
+  // A new browser tab on the same host sends this host-only session cookie too; ports do not scope cookies.
+  expect(siteCookie).not.toContain('Domain=');
+  const separateTabAggregate = await get(port, '/api/v1/work-orders/site-aggregate', { cookie: siteCookie }); expect(separateTabAggregate.status).toBe(200);
+  const firstPreview = await get(port, '/api/v1/work-orders/preview?site=SITE-A&offset=0', { cookie: siteCookie }); const firstPreviewBody = JSON.parse(firstPreview.body) as { totalCount: number; records: { site: string }[]; limit: number; offset: number }; expect(firstPreviewBody).toMatchObject({ totalCount: 560, limit: 20, offset: 0 }); expect(firstPreviewBody.records).toHaveLength(20); expect(firstPreviewBody.records.every((record) => record.site === 'SITE-A')).toBe(true);
+  const preview = await get(port, '/api/v1/work-orders/preview?site=SITE-A&offset=20&ignored=%27DROP%27', { cookie: siteCookie }); const previewBody = JSON.parse(preview.body) as { totalCount: number; records: { site: string }[]; limit: number; offset: number }; expect(previewBody).toMatchObject({ totalCount: 560, limit: 20, offset: 20 }); expect(previewBody.records).toHaveLength(20); expect(previewBody.records.every((record) => record.site === 'SITE-A')).toBe(true);
+  const principal = await get(port, '/api/v1/session', { cookie: siteCookie }); expect(JSON.parse(principal.body)).toMatchObject({ principal: { username: 'site.a.user', role: 'user' } }); expect(principal.headers['set-cookie']).toBeUndefined();
+  expect((await get(port, '/api/v1/work-orders/preview?site=SITE-B', { cookie: siteCookie })).status).toBe(403);
+  const aggregateAfterDeniedPreview = await get(port, '/api/v1/work-orders/site-aggregate', { cookie: siteCookie }); expect(aggregateAfterDeniedPreview.status).toBe(200); expect(JSON.parse(aggregateAfterDeniedPreview.body)).toMatchObject({ totalCount: 560 }); expect(aggregateAfterDeniedPreview.headers['set-cookie']).toBeUndefined();
+  const noPermissionCookie = await login('no.workorder.user', 'A-strong-no-workorder-password'); expect((await get(port, '/api/v1/work-orders/site-aggregate', { cookie: noPermissionCookie })).status).toBe(403);
+  const administratorCookie = await login('axeon.admin', 'A-strong-local-password'); expect(JSON.parse((await get(port, '/api/v1/work-orders/site-aggregate', { cookie: administratorCookie })).body).totalCount).toBe(2000);
+  workOrderData.close();
 });
