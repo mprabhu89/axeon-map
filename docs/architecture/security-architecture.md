@@ -57,4 +57,14 @@ The browser receives an opaque HttpOnly `SameSite=Strict` session cookie. `Secur
 
 This local Axeon principal is not a Maximo authorization identity. Before future data access, the server must map or federate the authenticated user through a supported Maximo authorization design, then retrieve only permitted normalized records, aggregates, evidence, exports, reports, and AI Context Pack data. A Db2 or SQL Server read account cannot substitute for that user-specific authorization proof. Future OIDC/SAML providers plug into the authentication-provider port; production secrets and network provider configuration remain server-side.
 
+## Synthetic database isolation (Task 024)
+
+The synthetic SQLite repository accepts the authenticated server principal only. It resolves a seeded test authorization profile before querying: Work Order permission, organization, and explicit allowed sites are mandatory. The profile is distinct from Axeon Administrator/User role. Aggregate and preview statements bind the resolved organization and sites first; an optional requested site can only narrow a previously authorized scope. Unmapped, missing, malformed, permissionless, and cross-site contexts fail closed. Browser query parameters cannot supply a database path, table, SQL, scope, or broader site list.
+
+The database fixture is local fictitious data and uses Node's experimental SQLite runtime API. It proves no Maximo authorization. Db2/SQL Server account read privilege, application authorization, organization/site restrictions, APIs/Object Structures, and user identity propagation must be demonstrated in an authorized environment before any external data reaches Axeon.
+
+## AX-025 connection configuration boundary
+
+Connection definitions are server-only deployment metadata, separate from object profiles and user authorization. AX-025 accepts approved Db2, SQL Server, and HTTPS Maximo REST definitions only when their referenced credential environment variables are present. Credential values are not placed in the registry, diagnostic output, API responses, or browser-delivered configuration. Invalid, unapproved, incomplete, or non-read-only definitions fail closed before the server begins accepting requests. A future database/API provider must use the configured bounded policy and a server-only credential lookup, but neither a read-only account nor a valid connection substitutes for current-user Maximo authorization.
+
 The foundation exposes only a public health route and static browser assets. It has no data route and no authentication bypass. Future protected operations use `requireAuthenticatedPrincipal` before object profile or adapter work. The configuration loader accepts safe references rather than credential values, the registry rejects query-bearing configuration, static path traversal is rejected, request bodies are bounded, and API errors disclose no internal configuration.

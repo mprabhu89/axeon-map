@@ -163,6 +163,16 @@ The self-hosted local server requires an administrator-created local Axeon accou
 
 The server creates opaque HttpOnly SameSite-protected sessions, uses Secure cookies for HTTPS/production configuration, expires inactive sessions, regenerates the session identifier at sign-in, invalidates it at logout, and requires a session CSRF token for state-changing actions. Administrator and User roles are server-enforced. Local Axeon identity is not Maximo authorization; future data routes must still authorize the user through Maximo before retrieving information.
 
+## Synthetic database authorization proof (Task 024)
+
+Synthetic SQLite mode is an explicit local server configuration, while the browser continues using the existing Mock Adapter by default. It recreates the established 2,000 fictitious Work Orders in a Git-ignored database and provides only a Site aggregate and a 20-record deterministic Work Order preview to authenticated server callers. It does not add a browser data source or change the investigation canvas.
+
+The local authorization profiles are deterministic verification fixtures. They apply Work Order permission plus organization and site scope before both aggregate and preview queries. Local Axeon Administrator is not an authorization bypass. Requests can only select the approved Site scope and preview offset; no SQL, arbitrary field, table, database path, credential, or write operation is exposed. This validates an architectural pattern only; Db2, SQL Server, and Maximo authorization remain unproven.
+
+## Secure connection configuration (Task 025)
+
+Axeon shall validate server-only approved connection definitions for future Db2, SQL Server, and Maximo REST adapter use. Definitions are separate from investigation object profiles and user authorization; they select no objects and grant no data access. Only read-only database/API modes, bounded policies, HTTPS Maximo REST URLs, and credential environment-variable references are accepted. The implementation validates configuration only and does not connect to an external system, execute SQL, or expose configuration in the browser.
+
 The V1 UI remains unchanged. Axeon now has a separate Node.js/TypeScript server foundation that serves the built browser application and exposes a versioned health endpoint. It intentionally exposes no Work Order, object, analytics, export, report, AI, Maximo, or database API. Future data APIs are contractually protected by authenticated-principal and authorization interfaces and must fail closed until authentication is implemented.
 
 The server owns validated non-secret configuration and a server-owned approved object-profile registry. Profiles support Work Orders, Service Requests, Incidents, Assets, and approved custom objects through allowed metadata only; they do not expose arbitrary SQL or grant Maximo permissions.

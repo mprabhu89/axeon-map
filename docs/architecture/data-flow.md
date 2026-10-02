@@ -221,3 +221,33 @@ flowchart LR
 ```
 
 Only the health branch exists in AX-022. The protected branch is a fail-closed contract and does not invoke adapters, databases, Maximo, or AI.
+
+## AX-024 local synthetic database proof
+
+```mermaid
+flowchart LR
+    Browser -->|authenticated GET only| Server[Node server]
+    Server --> Session[Resolve server session]
+    Session --> Scope[Resolve synthetic object/org/site scope]
+    Scope -->|parameterized approved statements| SQLite[Read-only local SQLite fixture]
+    SQLite --> Aggregate[Site aggregate]
+    SQLite --> Preview[20-record page]
+```
+
+The browser cannot send SQL, a table name, authorization scope, or a database path. The fixture is initialized separately from the shared 2,000-record deterministic generator. Scope is resolved from the authenticated principal before every statement and may only be narrowed by an optional validated Site query parameter. This is a local authorization-placement proof; future Db2, SQL Server, and Maximo API flows require independent current-user Maximo authorization validation.
+
+## AX-025 future approved connection flow
+
+```mermaid
+flowchart LR
+    Env[Server environment definition] --> Validate[Connection registry validation]
+    Validate --> Approved[Approved read-only definition]
+    Secret[Server credential environment value] --> Resolve[Server-only credential resolution]
+    Approved --> Future[Future provider connection lease]
+    Resolve --> Future
+    Future --> Auth[Current-user Maximo authorization]
+    Auth --> Adapter[Reviewed bounded adapter operation]
+    Adapter --> DTO[Normalized bounded Axeon DTO]
+```
+
+AX-025 implements only validation and contracts. It creates no lease, sends no request, and executes no database/API operation. The browser never receives the definition's credential value or any connection capability.

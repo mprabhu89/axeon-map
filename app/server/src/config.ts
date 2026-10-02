@@ -1,5 +1,6 @@
 import { dirname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadConnectionRegistry, type ConnectionRegistry } from './connectionRegistry.js';
 
 export type ServerEnvironment = 'development' | 'test' | 'production';
 export type FutureDatabaseProvider = 'none' | 'db2' | 'sql-server';
@@ -41,6 +42,8 @@ export interface AxeonServerConfiguration {
     readonly secureCookies: boolean;
   }>;
   readonly syntheticDatabase: SyntheticDatabaseConfiguration;
+  /** Approved server-only external connection definitions. No credential values are retained here. */
+  readonly connections: ConnectionRegistry;
   readonly database: FutureDatabaseConfiguration;
   readonly maximo: FutureMaximoConfiguration;
   readonly ai: FutureAIConfiguration;
@@ -108,6 +111,7 @@ export function loadServerConfiguration(environment: NodeJS.ProcessEnv = process
       enabled: syntheticDatabaseEnabled,
       filePath: resolve(environment.AXEON_SYNTHETIC_DATABASE_PATH ?? resolve(applicationRoot, '.axeon-synthetic-work-orders.sqlite')),
     }),
+    connections: loadConnectionRegistry(environment),
     database: Object.freeze({ provider: databaseProvider, enabled: databaseEnabled, connectionReference: safeReference(environment.AXEON_DATABASE_CONNECTION_REFERENCE, 'AXEON_DATABASE_CONNECTION_REFERENCE') }),
     maximo: Object.freeze({ enabled: parseBoolean(environment.AXEON_MAXIMO_ENABLED, 'AXEON_MAXIMO_ENABLED'), integrationReference: safeReference(environment.AXEON_MAXIMO_INTEGRATION_REFERENCE, 'AXEON_MAXIMO_INTEGRATION_REFERENCE') }),
     ai: Object.freeze({ enabled: parseBoolean(environment.AXEON_AI_ENABLED, 'AXEON_AI_ENABLED'), providerReference: safeReference(environment.AXEON_AI_PROVIDER_REFERENCE, 'AXEON_AI_PROVIDER_REFERENCE') }),

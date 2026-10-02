@@ -108,3 +108,9 @@ If account creation cannot verify the administrator, the CLI prints a local-only
 The browser remains in Mock Adapter mode by default. To initialize the separate, server-only local SQLite proof fixture, run `npm run build` then `npm run server:init-synthetic-db` from `app`. Set `AXEON_SYNTHETIC_DATABASE_ENABLED=true` before `npm run server:start` to expose only authenticated Site aggregate and 20-record preview proof endpoints. The fixture is fictitious, Git-ignored, deterministic, and never created by a normal investigation request. Details and seeded test-account names are in [Task 024 evidence](docs/test-evidence/task-024.md).
 
 For signed-in local API verification, use one host consistently: `http://127.0.0.1`. Vite development now binds to `http://127.0.0.1:5173` and proxies `/api` to the local server; direct server/API tabs use `http://127.0.0.1:3000`. Do not mix `localhost` and `127.0.0.1`, because the secure host-only session cookie must not cross origins.
+
+## Secure connection configuration (AX-025)
+
+AX-025 adds a server-only, provider-neutral connection registry for approved Db2, SQL Server, and HTTPS Maximo REST definitions. Definitions are supplied through `AXEON_CONNECTION_DEFINITIONS` and must declare an `approved` marker, a read-only mode, bounded timeout/concurrency policy, and the **name** of a credential environment variable. The registry validates that the referenced server environment variable is populated but never includes its value in configuration, API responses, logs, or browser code.
+
+This checkpoint does not install drivers, open a database/API connection, expose a connection-management UI, execute SQL, or establish Maximo authorization equivalence. A future adapter may obtain a credential only server-side immediately before opening a read-only lease. Empty configuration remains the default local Mock and synthetic SQLite experience.

@@ -12,12 +12,27 @@ test('server configuration validates runtime settings and retains only safe refe
   expect(configuration).toMatchObject({ environment: 'test', port: 3210, database: { provider: 'db2', enabled: true, connectionReference: 'vault/axeon-db2' } });
   expect(JSON.stringify(configuration)).not.toContain('must-not-appear');
   expect(configuration.session.secureCookies).toBe(false);
+  expect(configuration.connections.list()).toEqual([]);
 });
 
 test('default server state paths are anchored to the Axeon application root rather than the command working directory', () => {
   const configuration = loadServerConfiguration({ NODE_ENV: 'test' });
   expect(configuration.accountStorePath).toBe(join(resolveAxeonApplicationRoot(), '.axeon-local-accounts.json'));
   expect(configuration.syntheticDatabase.filePath).toBe(join(resolveAxeonApplicationRoot(), '.axeon-synthetic-work-orders.sqlite'));
+});
+
+test('server configuration retains approved connection metadata but never a referenced credential value', () => {
+  const secret = 'connection-secret-must-not-appear';
+  const configuration = loadServerConfiguration({
+    NODE_ENV: 'test',
+    AXEON_CONNECTION_DEFINITIONS: JSON.stringify([{
+      id: 'approved-db2', provider: 'db2', mode: 'read-only-database', approval: 'approved',
+      credentialEnvironmentVariable: 'AXEON_DB2_CREDENTIAL', host: 'db2.internal.example', databaseName: 'maximo',
+    }]),
+    AXEON_DB2_CREDENTIAL: secret,
+  });
+  expect(configuration.connections.get('approved-db2')).toMatchObject({ provider: 'db2', credentialEnvironmentVariable: 'AXEON_DB2_CREDENTIAL' });
+  expect(JSON.stringify(configuration)).not.toContain(secret);
 });
 
 test('production configuration marks session cookies Secure unless explicitly configured otherwise', () => {

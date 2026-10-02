@@ -45,3 +45,7 @@ The V1 report uses a same-origin browser tab/window and session-scoped snapshot 
 ## AX-023 localhost authentication boundary
 
 AX-023 binds the Node server to `127.0.0.1` by default and is not a network deployment. It uses an HttpOnly SameSite=Strict session cookie, adding `Secure` in production/HTTPS configuration. Before any network deployment, Axeon requires an approved TLS/reverse-proxy model, durable server-side session storage, account lifecycle/governance or enterprise identity provider, authentication/audit monitoring, CSRF-origin review, secret management, and a proven Maximo authorization mapping. The local account store and local password CLI must not be treated as a production identity service. AX-DEP-001 remains unvalidated.
+
+## AX-025 connection-configuration boundary
+
+AX-025 defines the server-side configuration boundary for future approved connections. Deployment must supply definitions and credential values separately: a definition contains only an approved provider, read-only mode, safe endpoint metadata, bounded policy, and credential environment-variable name; the secret-management system supplies the value only to the server process. Db2/SQL Server drivers, Maximo API integration, certificate trust policy, pooling, rotation, audit destination, and Maximo authorization validation remain deployment decisions and are not implemented or validated here.

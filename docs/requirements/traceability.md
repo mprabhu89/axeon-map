@@ -113,3 +113,19 @@ Acceptance evidence will be linked from [test evidence](../test-evidence/README.
 | AX-NFR-SEC-014 | Axeon Map shall require an authenticated server-managed session before rendering its self-hosted investigation application or accepting protected server API requests. | V1.1 Architecture Baseline, FDD, TDD, Security Architecture | Implemented for local server sessions; real-data APIs and network deployment remain out of scope | Task 023 authentication/session tests |
 | AX-NFR-SEC-015 | Axeon local account credentials shall be hashed server-side, session identifiers shall use HttpOnly SameSite-protected cookies, and state-changing session operations shall require CSRF verification. | FDD, TDD, Security Architecture | Implemented locally with scrypt, generated sessions, expiry/inactivity limits, and CSRF checks | Task 023 password/session/HTTP tests |
 | AX-AR-009 | Axeon authentication providers shall map authenticated identities into a provider-independent principal and server-session contract so future OIDC or SAML integration does not change investigation or adapter contracts. | V1.1 Architecture Baseline, Component Architecture, Security Architecture | Local password provider implemented; OIDC/SAML deferred | Task 023 provider contract tests |
+
+## Task 024 synthetic database and authorization feasibility requirements
+
+| ID | Requirement | Design source | Status | Evidence |
+| --- | --- | --- | --- |
+| AX-AR-010 | Axeon shall use a capability-oriented, server-side read-only Work Order data port that can be implemented by local SQLite, future Db2, SQL Server, Maximo APIs, or other approved adapters without exposing SQL to the browser. | V1.1 Architecture Baseline, TDD, Data Flow | Implemented for local synthetic SQLite aggregate and preview proof; real providers deferred | Task 024 repository and HTTP tests |
+| AX-NFR-SEC-016 | Axeon shall resolve and enforce effective object, organization, and site authorization scope server-side before every data aggregate or record preview, and shall fail closed when that scope is absent, invalid, or not permitted. | Security Architecture, TDD | Implemented for deterministic local synthetic profiles; real Maximo proof deferred | Task 024 authorization/isolation tests |
+| AX-NFR-PERF-004 | Server-side Work Order aggregation and record preview operations shall use approved allowlisted fields, parameterized values, and explicit bounded results. | TDD, Data Flow | Implemented for SQLite Site aggregate and 20-record preview | Task 024 query/bounds tests |
+
+## Task 025 secure connection configuration requirements
+
+| ID | Requirement | Design source | Status | Evidence |
+| --- | --- | --- | --- |
+| AX-AR-011 | Axeon shall maintain a server-only registry of approved, provider-neutral connection definitions for future Db2, SQL Server, and Maximo REST adapters, separate from object profiles and authorization policy. | V1.1 Architecture Baseline, TDD, Security Architecture | Implemented as validated configuration contracts; no external connection is implemented | Task 025 registry tests |
+| AX-NFR-SEC-017 | Axeon shall validate future connection definitions and referenced server-side credentials fail closed, retain no credential values in configuration, and never expose connection secrets to browser code, API responses, or ordinary logs. | TDD, Security Architecture, Deployment Architecture | Implemented locally for registry configuration; future secret manager integration pending | Task 025 validation and leakage tests |
+| AX-NFR-PERF-005 | Future external connection definitions shall specify bounded connection, operation, and concurrency policies and permit only explicit read-only connection modes. | TDD, Deployment Architecture | Implemented as typed registry policy; provider enforcement remains future | Task 025 policy tests |
